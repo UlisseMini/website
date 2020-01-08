@@ -1,7 +1,7 @@
-module Main exposing (..)
+module Main exposing (Model(..), Msg(..), init, main, update, view)
 
 import Browser
-import Html exposing (Html, Attribute, div, input, text)
+import Html exposing (Attribute, Html, div, text)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
 
@@ -11,32 +11,34 @@ import Html.Events exposing (onInput)
 
 
 main =
-  Browser.sandbox { init = init, update = update, view = view }
+    Browser.sandbox { init = init, update = update, view = view }
 
 
 
 -- MODEL
 
 
-type Model =
-  HomePage
+type Model
+    = HomePage
 
 
 init : Model
 init =
-  HomePage
+    HomePage
+
 
 
 -- UPDATE
 
 
 type Msg
-  = None
+    = None
 
 
 update : Msg -> Model -> Model
 update msg model =
-  HomePage
+    HomePage
+
 
 
 -- VIEW
@@ -44,6 +46,6 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-  div []
-    [
-    ]
+    div []
+        [ text "Hello :)"
+        ]
