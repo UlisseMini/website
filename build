@@ -1,0 +1,17 @@
+#!/bin/sh
+# Build a tarball with all the required files for running the application.
+set -e
+
+# Build index.html from elm
+cd ./elm-src
+elm make --optimize --output ../static/index.html ./src/Main.elm
+cd ..
+
+# Build he rust binary
+cargo build --release
+
+# Build the release files
+tar cf release.tar target/release/website static
+
+echo
+echo Done! copy ./release.tar to your server, untar it and run ./target/relase/website

@@ -1,0 +1,5 @@
+#!/bin/sh
+# Run the application.
+set -e
+
+./target/release/website
