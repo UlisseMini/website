@@ -1,0 +1,16 @@
+body {
+    font: 14px monospace
+    scroll-behavior: smooth
+    text-align: center;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-font-smoothing: antialiased;
+    font-smoothing: antialiased;
+
+    background: #000000;
+    color: #ffffff;
+}
+
+h1 {
+    text-align: center;
+}
