@@ -4,7 +4,7 @@ set -e
 
 # Build index.html from elm
 cd ./elm-src
-elm make --optimize --output ../static/index.html ./src/Main.elm
+elm make --optimize --output ../static/elm.js ./src/Main.elm
 cd ..
 
 # Build he rust binary
