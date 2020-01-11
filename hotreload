@@ -9,7 +9,7 @@ fi
 
 (
 	cd elm-src || exit 1
-	find . -name "*.elm" | entr -r elm make --output ../static/elm.js ./src/Main.elm
+	find . -name "*.elm" | entr -r elm make --output ../public/elm.js ./src/Main.elm
 ) &
 trap 'kill -2 $!' EXIT
 

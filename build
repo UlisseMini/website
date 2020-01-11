@@ -4,14 +4,14 @@ set -e
 
 # Build index.html from elm
 cd ./elm-src
-elm make --optimize --output ../static/elm.js ./src/Main.elm
+elm make --optimize --output ../public/elm.js ./src/Main.elm
 cd ..
 
 # Build he rust binary
 cargo build --release
 
 # Build the release files
-tar cf release.tar target/release/website static
+tar cf release.tar target/release/website public
 
 echo
 echo Done! copy ./release.tar to your server, untar it and run ./target/relase/website
