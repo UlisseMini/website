@@ -2,15 +2,9 @@
 # Recompile things when needed and run a dev server
 set -e
 
-if ! command -v entr cargo elm >/dev/null; then
-	echo Hotreload requires entr cargo and elm installed.
+if ! command -v entr cargo >/dev/null; then
+	echo Hotreload requires entr and cargo installed.
 	exit 1
 fi
-
-(
-	cd elm-src || exit 1
-	find . -name "*.elm" | entr -r elm make --output ../public/elm.js ./src/Main.elm
-) &
-trap 'kill -2 $!' EXIT
 
 find Cargo.* src -type f | entr -r sh -c 'cargo run < /dev/null'
