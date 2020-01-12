@@ -7,6 +7,7 @@
 
     <title>Uli's site</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/dark.min.css">
+    <script src="/msgbox.js"></script>
 
     <link rel="icon" href="/icon.png"/>
   </head>
@@ -30,7 +31,20 @@
         <li>Discord <code>uli#4334</code></li>
         <li>Email <code>ulisse.mini@gmail.com</code></li>
       </ul>
-      I'm planning on writing a direct way to message me on this site, When that goes live you'll be able to leave a message right here :)
     </p>
+
+    <!-- TODO: Add elm and make it handle the submission of messages. !-->
+    <div id="elm-msgbox">
+    </div>
+
+    <footer>
+      Site source code can be found <a href="https://github.com/UlisseMini/website">Here</a>
+    </footer>
   </body>
+
+  <script>
+    var app = Elm.Main.init({
+      node: document.getElementById('elm-msgbox')
+    });
+  </script>
 </html>

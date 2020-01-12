@@ -1,0 +1,24 @@
+#!/bin/sh
+# This script builds all files needed for the site into ./bin
+set -e
+
+# Reset ./bin
+rm -rf bin && mkdir bin
+
+# Build the frontend
+cd elm
+for dir in *; do
+	cd "$dir"
+	elm make src/Main.elm --optimize --output "../../bin/public/$dir.js"
+	cd ..
+done
+cd ..
+
+# Copy and minify static files
+minify -srv public -o bin/public
+
+# Build the backend
+cargo build --release
+cp -v target/release/website bin
+
+

@@ -1,10 +1,5 @@
 #!/bin/sh
-# Recompile things when needed and run a dev server
+# Recompile things when needed and run the server
 set -e
 
-if ! command -v entr cargo >/dev/null; then
-	echo Hotreload requires entr and cargo installed.
-	exit 1
-fi
-
-find Cargo.* src -type f | entr -r sh -c 'cargo run < /dev/null'
+find public src elm -type f | grep -v elm-stuff | entr -r sh -c './build && cd bin && ./website'

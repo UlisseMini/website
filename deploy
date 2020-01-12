@@ -1,0 +1,6 @@
+#!/bin/sh
+set -e
+
+./build
+scp -r bin root@uli.rocks:~/website-bin
+ssh root@uli.rocks 'pkill website && sleep 1 && cd website-bin && nohup ./website &>/dev/null &'
