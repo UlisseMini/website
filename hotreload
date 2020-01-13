@@ -2,4 +2,5 @@
 # Recompile things when needed and run the server
 set -e
 
-find public src elm -type f | grep -v elm-stuff | entr -r sh -c './build && cd bin && ./website'
+# < /dev/null is a workaround for a compiler bug
+find public src elm -type f | grep -v elm-stuff | entr -r sh -c './build < /dev/null && cd bin && ./website'
