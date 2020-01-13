@@ -2,5 +2,6 @@
 set -e
 
 ./build
-scp -r bin root@uli.rocks:~/
-ssh root@uli.rocks 'pkill website && sleep 1 && cd bin && nohup ./website &>log &'
+ssh root@uli.rocks 'pkill website'
+scp -rC bin root@uli.rocks:~/
+ssh root@uli.rocks 'cd bin && nohup ./website &>log &'
