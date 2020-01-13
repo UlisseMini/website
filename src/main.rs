@@ -11,6 +11,8 @@ use std::io::prelude::*;
 const MAX_SIZE: usize = 262_144; // max payload size is 16k
 
 // TODO: Add rate limiting
+// TODO: Make server errors nicer (currently frontend says 500 error not error message)
+// TODO: Record IP and Date of messages
 async fn message(mut payload: web::Payload) -> Result<HttpResponse, Error> {
     let mut bytes = web::BytesMut::new();
     while let Some(chunk) = payload.next().await {
@@ -24,6 +26,7 @@ async fn message(mut payload: web::Payload) -> Result<HttpResponse, Error> {
     }
 
     // TODO: Make async
+    // TODO: Compress file when it reaches a specific size?
     let mut file = OpenOptions::new()
         .append(true)
         .create(true)
