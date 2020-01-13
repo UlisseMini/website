@@ -4,6 +4,7 @@ import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Http exposing (..)
 
 
 
@@ -23,14 +24,15 @@ main =
 -- MODEL
 
 
-type alias Model =
-    { content : String
-    }
+type Model
+    = Content String
+    | Submitting
+    | Submitted (Result Http.Error String)
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { content = "" }, Cmd.none )
+    ( Content "", Cmd.none )
 
 
 
@@ -39,13 +41,27 @@ init _ =
 
 type Msg
     = Change String
+    | Submit
+    | Response (Result Http.Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Change str ->
-            ( { content = str }, Cmd.none )
+            ( Content str, Cmd.none )
+
+        Submit ->
+            ( model
+            , Http.post
+                { url = "/message"
+                , body = Http.stringBody "text/plain" (content model)
+                , expect = Http.expectString Response
+                }
+            )
+
+        Response result ->
+            ( Submitted result, Cmd.none )
 
 
 
@@ -64,5 +80,54 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div [ id "elm-msgbox" ]
-        [ textarea [ placeholder "Or you can leave a message here :)", rows 20 ] []
+        [ textarea [ placeholder "Or leave a message here", value (content model), onInput Change, cols 40, rows 15 ] []
+        , button [ onClick Submit ] [ text (buttonText model) ]
         ]
+
+
+buttonText : Model -> String
+buttonText model =
+    case model of
+        Content _ ->
+            "Submit"
+
+        Submitting ->
+            "Submitting"
+
+        Submitted result ->
+            case result of
+                Err e ->
+                    httpError e
+
+                -- The backend provides the button status in this case
+                Ok status ->
+                    status
+
+
+httpError : Http.Error -> String
+httpError e =
+    case e of
+        Timeout ->
+            "Timed out"
+
+        BadUrl s ->
+            "Bad URL " ++ s
+
+        NetworkError ->
+            "Network Error"
+
+        BadStatus i ->
+            "Bad Status " ++ String.fromInt i
+
+        BadBody s ->
+            "Bad Body " ++ s
+
+
+content : Model -> String
+content model =
+    case model of
+        Content str ->
+            str
+
+        _ ->
+            ""
