@@ -3,7 +3,7 @@
 set -e
 
 # Reset ./bin
-rm -rf bin && mkdir bin
+rm -rf bin && mkdir -p bin/public
 
 # Build the frontend
 cd elm
@@ -15,7 +15,8 @@ done
 cd ..
 
 # Copy and minify static files
-minify -srv public -o bin/public
+cp -rv public/* bin/public
+minify -srv bin/public -o bin/public
 
 # Build the backend
 cargo build --release
