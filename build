@@ -2,6 +2,18 @@
 # This script builds all files needed for the site into ./bin
 set -e
 
+# Can be release or debug
+profile="$1"
+if [ "$profile" != "profile" ] && [ "$profile" != "debug" ]; then
+	echo "profile must be release or debug, got $profile"
+	exit 1
+fi
+
+elm_cmd="elm make src/Main.elm"
+if [ "$profile" = "release" ]; then
+	elm_cmd="$elm_cmd --optimize"
+fi
+
 # Reset ./bin
 rm -rf bin && mkdir -p bin/public
 
@@ -9,7 +21,7 @@ rm -rf bin && mkdir -p bin/public
 cd elm
 for dir in *; do
 	cd "$dir"
-	elm make src/Main.elm --optimize --output "../../bin/public/$dir.js"
+	$elm_cmd --output "../../bin/public/$dir.js"
 	cd ..
 done
 cd ..
@@ -19,7 +31,10 @@ cp -rv public/* bin/public
 minify -srv bin/public -o bin/public
 
 # Build the backend
-cargo build --release
-cp -v target/release/website bin
-
-
+if [ "$profile" = "release" ]; then
+	cargo build "--$profile"
+	cp -v target/"$profile"/website bin
+else
+	cargo build
+	cp -v target/debug/website bin
+fi
