@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-./build
+./build release
 ssh root@uli.rocks 'pkill website'
 scp -rC bin root@uli.rocks:~/
 ssh root@uli.rocks 'cd bin && nohup ./website &>log &'

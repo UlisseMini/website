@@ -4,7 +4,7 @@ set -e
 
 # Can be release or debug
 profile="$1"
-if [ "$profile" != "profile" ] && [ "$profile" != "debug" ]; then
+if [ "$profile" != "release" ] && [ "$profile" != "debug" ]; then
 	echo "profile must be release or debug, got $profile"
 	exit 1
 fi
