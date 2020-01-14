@@ -1,7 +1,5 @@
 use actix_files as fs;
-use actix_web::{
-    middleware, web, App, HttpRequest, HttpResponse, HttpServer, Error, error
-};
+use actix_web::{error, middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer};
 use env_logger;
 use futures::StreamExt;
 
@@ -11,7 +9,26 @@ use std::io::prelude::*;
 const MAX_SIZE: usize = 262_144; // max payload size is 16k
 
 fn get_user_agent<'a>(req: &'a HttpRequest) -> Option<&'a str> {
-        req.headers().get("User-Agent")?.to_str().ok()
+    req.headers().get("User-Agent")?.to_str().ok()
+}
+
+fn make_suffix(req: HttpRequest) -> String {
+    use chrono::Utc;
+    use chrono_tz::America::New_York;
+
+    let date = Utc::now();
+
+    let conn_info = req.connection_info();
+
+    // TODO: Fix this, it is reporting incorrect time!
+    format!(
+        "addr: {}\nuser-agent: {}\ndate: {}\n",
+        conn_info.remote().unwrap_or("???"),
+        get_user_agent(&req).unwrap_or("???"),
+        date.with_timezone(&New_York)
+            .format("%D %I:%M:%S %p")
+            .to_string()
+    )
 }
 
 // TODO: Add rate limiting
@@ -37,16 +54,11 @@ async fn message(mut payload: web::Payload, req: HttpRequest) -> Result<HttpResp
         .create(true)
         .open("messages.txt")?;
 
-
-    let conn_info = req.connection_info();
-    let suffix = format!("\n\n{} | {}\n\n",
-        conn_info.remote().unwrap_or("???"),
-        get_user_agent(&req).unwrap_or("???"));
-    bytes.extend_from_slice(suffix.as_bytes());
+    bytes.extend_from_slice(b"\n--------------------------------------\n");
+    file.write_all(&make_suffix(req).as_bytes())?;
     file.write_all(&bytes)?;
 
     Ok(HttpResponse::Ok().body("Submitted"))
-
 }
 
 #[actix_rt::main]
