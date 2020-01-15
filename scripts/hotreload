@@ -1,0 +1,14 @@
+#!/bin/sh
+# Recompile things when needed and run the server
+set -e
+
+# Frontend hotreload
+(
+	find public elm -type f \
+		| grep -v elm-stuff \
+		| entr -r sh -c 'profile=debug ./scripts/build-frontend' ) &
+pid="$!"
+trap 'pkill "$pid"' EXIT
+
+# Backend hotreload
+find src Cargo* -type f | entr -r ./scripts/build-backend

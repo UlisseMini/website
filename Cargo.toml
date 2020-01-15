@@ -16,3 +16,6 @@ actix-files = "0.2.1"
 futures = "0.3.*"
 chrono = "0.4"
 chrono-tz = "0.5"
+
+# TODO: Compile listenfd only for non release builds
+listenfd = "0.3"
