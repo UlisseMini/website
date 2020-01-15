@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+
+profile="$1"
+if [ "$profile" != "release" ] && [ "$profile" != "debug" ]; then
+	echo "profile must be release or debug, got '$profile'"
+	exit 1
+fi
+export profile
+
+./scripts/build-frontend
+./scripts/build-backend

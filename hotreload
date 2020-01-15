@@ -1,6 +1,0 @@
-#!/bin/sh
-# Recompile things when needed and run the server
-set -e
-
-# < /dev/null is a workaround for a compiler bug
-find public src elm -type f | grep -v elm-stuff | entr -r sh -c './build debug < /dev/null && cd bin && ./website'

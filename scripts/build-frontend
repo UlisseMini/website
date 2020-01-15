@@ -1,0 +1,23 @@
+#!/bin/sh
+set -e
+
+elm_cmd="elm make src/Main.elm"
+if [ "$profile" = "release" ]; then
+	elm_cmd="$elm_cmd --optimize"
+fi
+
+# Reset ./bin
+rm -rf bin && mkdir -p bin/public
+
+# Build the frontend
+cd elm
+for dir in *; do
+	cd "$dir"
+	$elm_cmd --output "../../bin/public/$dir.js"
+	cd ..
+done
+cd ..
+
+# Copy and minify static files
+cp -rv public/* bin/public
+minify -srv bin/public -o bin/public

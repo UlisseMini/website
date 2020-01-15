@@ -1,0 +1,13 @@
+#!/bin/sh
+# This script builds all files needed for the site into ./bin
+set -e
+
+# < /dev/null works around a compiler bug that happens
+# when cargo is called in a subprocess in a special way. (entr)
+if [ "$profile" = "release" ]; then
+	cargo build "--$profile" < /dev/null
+	cp -v target/"$profile"/website bin
+else
+	cargo build < /dev/null
+	cp -v target/debug/website bin
+fi
