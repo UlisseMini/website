@@ -9,4 +9,4 @@ fi
 export profile
 
 ./scripts/build-frontend
-./scripts/build-backend
+./scripts/build-backend-"$profile"
