@@ -58,4 +58,3 @@ pub async fn message(mut payload: web::Payload, req: HttpRequest) -> Result<Http
 
     Ok(HttpResponse::Ok().body("Submitted"))
 }
-
