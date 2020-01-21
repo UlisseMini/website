@@ -1,7 +1,12 @@
 #!/bin/sh
 set -e
 
+if [ -z "$DISCORD_WEBHOOK" ]; then
+	echo "Please provide the discord webhook url in the enviorment variable DISCORD_WEBHOOK"
+	exit 1
+fi
+
 ./scripts/build release
 ssh root@uli.rocks 'pkill website'
 scp -rC bin root@uli.rocks:~/
-ssh root@uli.rocks 'cd bin && nohup ./website &>log &'
+ssh root@uli.rocks "cd bin && DISCORD_WEBHOOK='$DISCORD_WEBHOOK' nohup ./website &>log &"

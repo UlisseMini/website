@@ -4,6 +4,10 @@ use env_logger;
 
 mod message;
 
+pub struct AppState {
+    pub webhook: String,
+}
+
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_web=info");
@@ -15,8 +19,12 @@ async fn main() -> std::io::Result<()> {
 
     env_logger::init();
 
-    HttpServer::new(|| {
+    HttpServer::new(move || {
+        let webhook = std::env::var("DISCORD_WEBHOOK").expect("DISCORD_WEBHOOK enviorment variable not set");
         App::new()
+            .data(AppState {
+                webhook: webhook,
+            })
             .wrap(middleware::Logger::default())
             .route("/message", web::post().to(message::message))
             .service(fs::Files::new("/", "./public").index_file("index.html"))

@@ -1,39 +1,25 @@
 use actix_web::{error, web, Error, HttpRequest, HttpResponse};
 use futures::StreamExt;
 
-use std::fs::OpenOptions;
-use std::io::prelude::*;
+use crate::AppState;
+
+use awc::Client;
+use serde::Serialize;
+use std::str;
 
 const MAX_SIZE: usize = 262_144; // max payload size is 16k
 
-fn get_user_agent<'a>(req: &'a HttpRequest) -> Option<&'a str> {
-    req.headers().get("User-Agent")?.to_str().ok()
-}
-
-fn make_prefix(req: HttpRequest) -> String {
-    use chrono::Utc;
-    use chrono_tz::America::New_York;
-
-    let date = Utc::now();
-
-    let conn_info = req.connection_info();
-
-    // TODO: Fix this, it is reporting incorrect time!
-    format!(
-        "addr: {}\nuser-agent: {}\ndate: {}\n",
-        conn_info.remote().unwrap_or("???"),
-        get_user_agent(&req).unwrap_or("???"),
-        date.with_timezone(&New_York)
-            .format("%D %I:%M:%S %p")
-            .to_string()
-    )
+#[derive(Serialize)]
+struct Message<'a> {
+    content: &'a str,
 }
 
 // TODO: Add rate limiting
-// TODO: Make server errors nicer (currently frontend says 500 error not error message)
-// TODO: Record Date of messages
-// TODO: Save messages in a more efficent way
-pub async fn message(mut payload: web::Payload, req: HttpRequest) -> Result<HttpResponse, Error> {
+pub async fn message(
+    mut payload: web::Payload,
+    _req: HttpRequest,
+    state: web::Data<AppState>,
+) -> Result<HttpResponse, Error> {
     let mut bytes = web::BytesMut::new();
     while let Some(chunk) = payload.next().await {
         let chunk = chunk?;
@@ -45,16 +31,25 @@ pub async fn message(mut payload: web::Payload, req: HttpRequest) -> Result<Http
         bytes.extend_from_slice(&chunk);
     }
 
-    // TODO: Make async
-    // TODO: Compress file when it reaches a specific size?
-    let mut file = OpenOptions::new()
-        .append(true)
-        .create(true)
-        .open("messages.txt")?;
+    let webhook = &state.get_ref().webhook;
+    let json = Message {
+        content: &str::from_utf8(&bytes)?,
+    };
+    let client = Client::default();
 
-    bytes.extend_from_slice(b"\n--------------------------------------\n");
-    file.write_all(&make_prefix(req).as_bytes())?;
-    file.write_all(&bytes)?;
+    let response = client
+        .post(webhook) // <- Create request builder
+        .header("User-Agent", "Actix-web")
+        .send_json(&json) // <- Send http request
+        .await?;
 
-    Ok(HttpResponse::Ok().body("Submitted"))
+    let status = response.status();
+
+    if status.is_success() {
+        return Ok(HttpResponse::Ok().body("Submitted"));
+    } else {
+        Err(Error::from(
+            HttpResponse::InternalServerError().body("Webhook push failed"),
+        ))
+    }
 }
