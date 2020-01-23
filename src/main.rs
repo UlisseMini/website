@@ -18,9 +18,10 @@ async fn main() -> std::io::Result<()> {
         .expect("PORT must be a number");
 
     env_logger::init();
+    std::env::var("DISCORD_WEBHOOK").expect("DISCORD_WEBHOOK enviorment variable not set");
 
     HttpServer::new(move || {
-        let webhook = std::env::var("DISCORD_WEBHOOK").expect("DISCORD_WEBHOOK enviorment variable not set");
+        let webhook = std::env::var("DISCORD_WEBHOOK").unwrap();
         App::new()
             .data(AppState {
                 webhook: webhook,
