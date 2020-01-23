@@ -7,7 +7,7 @@ use awc::Client;
 use serde::Serialize;
 use std::str;
 
-const MAX_SIZE: usize = 262_144; // max payload size is 16k
+const MAX_SIZE: usize = 1800; // max payload size is 2k (discord size limit - prefix)
 
 #[derive(Serialize)]
 struct Message<'a> {
@@ -17,7 +17,7 @@ struct Message<'a> {
 // TODO: Add rate limiting
 pub async fn message(
     mut payload: web::Payload,
-    _req: HttpRequest,
+    req: HttpRequest,
     state: web::Data<AppState>,
 ) -> Result<HttpResponse, Error> {
     let mut bytes = web::BytesMut::new();
@@ -33,7 +33,7 @@ pub async fn message(
 
     let webhook = &state.get_ref().webhook;
     let json = Message {
-        content: &str::from_utf8(&bytes)?,
+        content: &(make_prefix(req) + str::from_utf8(&bytes)?)
     };
     let client = Client::default();
 
@@ -53,3 +53,19 @@ pub async fn message(
         ))
     }
 }
+
+fn get_user_agent<'a>(req: &'a HttpRequest) -> Option<&'a str> {
+    req.headers().get("User-Agent")?.to_str().ok()
+}
+
+fn make_prefix(req: HttpRequest) -> String {
+    let conn_info = req.connection_info();
+
+    format!(
+        "`{} - {}`\n",
+        conn_info.remote().unwrap_or("???"),
+        get_user_agent(&req).unwrap_or("???"),
+    )
+}
+
+
